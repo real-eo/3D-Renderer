@@ -1,0 +1,35 @@
+### Define Parameters
+ax, ay, az (the 3D point)
+cx, cy, cz (camera position)
+θx, θy, θz (camera orientation, in radians)
+ex, ey, ez (projection plane parameters, typically ex=0, ey=0, ez=1)
+
+
+### Define Camera Transform (d = a – c, then rotate)
+x = ax - cx
+y = ay - cy
+z = az - cz
+
+dx = cos(θy) * (sin(θz)*y + cos(θz)*x) - sin(θy) * z
+dy = sin(θx) * (cos(θy)*z + sin(θy)*(sin(θz)*y + cos(θz)*x)) 
+     + cos(θx) * (cos(θz)*y - sin(θz)*x)
+dz = cos(θx) * (cos(θy)*z + sin(θy)*(sin(θz)*y + cos(θz)*x)) 
+     - sin(θx) * (cos(θz)*y - sin(θz)*x)
+
+
+### Define Camera Transform (d = a – c, then rotate)
+bx = (e_z/dz) * dx + ex
+by = (e_z/dz) * dy + ey
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#### THE FOLLOWING EQUATION IS JUST A WRITTEN OUT VERSION FOR A VERTICY v_1, BUT IT CAN VERY WELL BE USED FOR AN ARRAY OF VERTICIES, BUT THEN YOU'D HAVE TO CHANGE THE v_1 VARABLE INTO v_i!
+
+
+dx = cos(θ_y) * (sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x)) - sin(θ_y) * (z(v_1) - c_z)
+dy = sin(θ_x) * (cos(θ_y)*(z(v_1) - c_z) + sin(θ_y)*(sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x))) + cos(θ_x) * (cos(θ_z)*(y(v_1) - c_y) - sin(θ_z)*(x(v_1) - c_x))
+dz = cos(θ_x) * (cos(θ_y)*(z(v_1) - c_z) + sin(θ_y)*(sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x))) - sin(θ_x) * (cos(θ_z)*(y(v_1) - c_y) - sin(θ_z)*(x(v_1) - c_x))
+
+
+bx = (e_z/(cos(θ_x) * (cos(θ_y)*(z(v_1) - c_z) + sin(θ_y)*(sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x))) - sin(θ_x) * (cos(θ_z)*(y(v_1) - c_y) - sin(θ_z)*(x(v_1) - c_x)))) * (cos(θ_y) * (sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x)) - sin(θ_y) * (z(v_1) - c_z)) + e_x
+
+by = (e_z/(cos(θ_x) * (cos(θ_y)*(z(v_1) - c_z) + sin(θ_y)*(sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x))) - sin(θ_x) * (cos(θ_z)*(y(v_1) - c_y) - sin(θ_z)*(x(v_1) - c_x)))) * (sin(θ_x) * (cos(θ_y)*(z(v_1) - c_z) + sin(θ_y)*(sin(θ_z)*(y(v_1) - c_y) + cos(θ_z)*(x(v_1) - c_x))) + cos(θ_x) * (cos(θ_z)*(y(v_1) - c_y) - sin(θ_z)*(x(v_1) - c_x))) + e_y
