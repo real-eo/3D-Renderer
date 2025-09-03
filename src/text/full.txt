@@ -1,0 +1,130 @@
+/// @brief A class for rendering text in the SDL window
+class Text {
+private:
+    // * Variables
+    std::string text;
+    Point2D position;
+    
+    SDL_Color textColor;
+    TTF_Font* font;
+    
+    SDL_Surface* textSurface;
+    SDL_Texture* textTexture;
+
+    SDL_Renderer* renderer;
+
+    // * Methods
+    inline void freeText() {
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+    }
+
+    inline void createTextTexture() {
+        this->textSurface = TTF_RenderText_Solid(this->font, this->text.c_str(), this->textColor);
+        
+        /*
+        if (this->textSurface == nullptr) {
+            std::cerr << "Failed to create Text(\"" << this->text << "\")" << " surface: " << TTF_GetError() << std::endl;
+        }
+        */
+
+        this->textTexture = SDL_CreateTextureFromSurface(renderer, this->textSurface);
+        
+        /*
+        if (this->textTexture == nullptr) {
+            std::cerr << "Failed to create Text(\"" << this->text << "\")" << " texture: " << SDL_GetError() << std::endl;
+        }
+        */
+    }
+
+public:
+    // * Constructors
+    Text();
+    Text(Point2D position, TTF_Font* font, SDL_Renderer* renderer);
+    Text(const std::string text, const Point2D position, const SDL_Color textColor, TTF_Font* font, SDL_Renderer* renderer);
+
+    ~Text();
+
+    void updateText(std::string text) {
+        this->text = text;
+
+        freeText();
+        createTextTexture();
+    }
+    
+    void renderText() {
+        //  this->textRect = {position.x, position.y, textSurface->w, textSurface->h};
+        SDL_Rect textRect = {position.x, position.y, textSurface->w, textSurface->h};
+
+        /* Compare the renderer's format to the surface format
+        SDL_RendererInfo rendererInfo;
+        if (SDL_GetRendererInfo(renderer, &rendererInfo) != 0) {
+            // Handle error
+            std::cerr << "SDL_GetRendererInfo failed: " << SDL_GetError() << std::endl;
+        } else {
+            // Check if the surface format is supported
+            bool formatSupported = false;
+            for (Uint32 i = 0; i < rendererInfo.num_texture_formats; i++) {
+                if (rendererInfo.texture_formats[i] == textSurface->format->format) {
+                    formatSupported = true;
+                    break;
+                }
+            }
+
+            if (!formatSupported) {
+                std::cerr << "Surface format not supported by renderer" << std::endl;
+            }
+        }
+        */
+
+        /*x
+        if (SDL_RenderCopy(renderer, textTexture, NULL, &(this->textRect)) != 0) {
+            std::cerr << "Failed to render Text(\"" << this->text << "\"): " << SDL_GetError() << std::endl;
+        }
+        */
+
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    }
+
+    void displayDebug() {
+        std::cout << "Text: \"" << text << "\"" << std::endl;
+        std::cout << "Position: " << position.x << ", " << position.y << std::endl;
+        std::cout << "Color: " << (int)textColor.r << ", " << (int)textColor.g << ", " << (int)textColor.b << ", " << (int)textColor.a << std::endl;
+        std::cout << "Is font null: " << (font == nullptr) << std::endl;
+        std::cout << "Is renderer null: " << (renderer == nullptr) << std::endl;
+        std::cout << "Is textSurface null: " << (textSurface == nullptr) << std::endl;
+        std::cout << "Is textTexture null: " << (textTexture == nullptr) << std::endl;
+    }
+};
+
+Text::Text() : text(" "), position(Point2D(0, 0)), textColor(WHITE), font(nullptr), renderer(nullptr) { createTextTexture(); };
+
+Text::Text(const Point2D position, TTF_Font* font, SDL_Renderer* renderer) : position(position), font(font), renderer(renderer), text(" "), textColor(WHITE) {
+    // ! NOTE: If this string is either empty or greater than 3 capital letters/ 4 lowercase letters, 
+    // !       the program will crash. UPDATE: It was because of a stack overflow, and is now fixed (I think)
+    this->text = " ";   
+
+    this->position = position;
+    this->font = font;
+    this->textColor = WHITE;
+    this->renderer = renderer;
+
+    createTextTexture();
+};
+
+Text::Text(const std::string text, const Point2D position, const SDL_Color textColor, TTF_Font* font, SDL_Renderer* renderer) : text(text), position(position), textColor(textColor), font(font), renderer(renderer) {
+    this->text = text;
+    this->position = position;
+    this->font = font;
+    this->textColor = textColor;
+
+    createTextTexture();
+};
+
+Text::~Text() { 
+    freeText(); 
+    
+    std::cout << "Text(\"" << this->text << "\") destroyed" << std::endl; 
+};
+
+

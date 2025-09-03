@@ -1,0 +1,165 @@
+/// @brief A class representing a first person camera in 3D space
+class Camera {
+private:
+    // * Variables
+    // Movement
+    bool freeCam = false;
+    int cameraMovementSpeed = 1;
+    float yAxisFreecamMovementScalar = 1.0f;  // This is so that the camera moves forward based on how much up/down the camera is rotated
+
+    const float CAMERA_ROTATION_RESTRICTION = F_HPI;
+    const int CAMERA_MOVEMENT_SPEED_CONSTANT = 250;
+
+
+    // * Methods
+    void updateCacheMatrix() {
+        // Update cache matrix
+        cacheMatrix = {
+            {sinf(rotation.pitch), 0.0f, cosf(rotation.pitch)},
+            {sinf(rotation.yaw), tanf(rotation.yaw), cosf(rotation.yaw)},
+            {sinf(rotation.roll), 0.0f, cosf(rotation.roll)}
+        };
+    }
+
+    void updateRotationMatrix() {
+        /* // Update rotation matrix
+        rotationMatrix = {
+            {1.0f, -(abs(cacheMatrix.xAxis.pitch)), 1.0f},
+            {-cacheMatrix.yAxis.pitch, abs(cacheMatrix.yAxis.yaw), cacheMatrix.yAxis.roll},
+            {1.0f, 1.0f, 1.0f}
+        };
+        // */
+
+       rotationMatrix.yAxis = {-cacheMatrix.yAxis.pitch, abs(cacheMatrix.yAxis.yaw), cacheMatrix.yAxis.roll};
+        
+    }
+
+public:
+    // * Variables
+    // Camera
+    Point3D position;
+    Rotation3D rotation;
+    int focalLength;
+    
+    int fov;
+    float screenHeight_world;
+    float perspectiveProjectionConstant;    // ? Constant used to calculate pixels per world unit in the perspective projection
+
+    Quaternion quaternion;
+
+    // Caches
+    RotationMatrix3D cacheMatrix;
+    RotationMatrix3D rotationMatrix;
+
+    Camera(Point2D screenSize);
+    Camera(Point3D position, Rotation3D rotation, int focalLength, RotationMatrix3D cacheMatrix, RotationMatrix3D rotationMatrix);
+    ~Camera();
+
+    void move(const Uint8 *key) {
+        // Keybaord input (I don't fucking know how this works, but it works out - I did the math on a random sheet of paper somewhere. Also, might wanna change positioning to float, but cba)
+        if (key[SDL_SCANCODE_W]) {
+            // Y-plane
+            if (freeCam) {
+                position.y += cameraMovementSpeed * cacheMatrix.xAxis.pitch;
+                yAxisFreecamMovementScalar = abs(cacheMatrix.xAxis.roll);
+            }
+
+            // X & Z-plane
+            position.x += cameraMovementSpeed * rotationMatrix.yAxis.pitch * yAxisFreecamMovementScalar;
+            position.z += cameraMovementSpeed * rotationMatrix.yAxis.roll * yAxisFreecamMovementScalar;          
+        } if (key[SDL_SCANCODE_S]) {
+            // X & Z-plane
+            position.x -= cameraMovementSpeed * rotationMatrix.yAxis.pitch;
+            position.z -= cameraMovementSpeed * rotationMatrix.yAxis.roll;            
+        } if (key[SDL_SCANCODE_A]) {
+            // X & Z-plane
+            position.x += cameraMovementSpeed * -rotationMatrix.yAxis.roll;
+            position.z += cameraMovementSpeed * rotationMatrix.yAxis.pitch;
+        } if (key[SDL_SCANCODE_D]) {
+            // X & Z-plane
+            position.x -= cameraMovementSpeed * -rotationMatrix.yAxis.roll;
+            position.z -= cameraMovementSpeed * rotationMatrix.yAxis.pitch;
+        } 
+        // Up & down is just a change in Y-axis - makes things 1000x easier for me :D
+        if (key[SDL_SCANCODE_SPACE]) {
+            // Y-plane
+            position.y += cameraMovementSpeed;
+        } if (key[SDL_SCANCODE_LSHIFT]) {
+            // Y-plane
+            position.y -= cameraMovementSpeed;   
+        }
+    }
+
+    void rotate(Rotation3D rotation, const std::vector<bool> isAbsolute) {
+        this->rotation = {
+            // ! X-axis rotation is restricted
+            isAbsolute[X_AXIS] ? std::fmod(rotation.pitch, F_2PI) : std::min(std::max(
+
+                    this->rotation.pitch + rotation.pitch, 
+
+                -CAMERA_ROTATION_RESTRICTION), 
+                 CAMERA_ROTATION_RESTRICTION
+            ),
+            
+            // ! Y-axis rotation is not restricted
+            std::fmod(
+                
+                isAbsolute[Y_AXIS] ? rotation.yaw : this->rotation.yaw + rotation.yaw, 
+
+            F_2PI),
+            
+            // ! Z-axis rotation is mostly redundant
+            isAbsolute[Z_AXIS] ? rotation.roll : this->rotation.roll + rotation.roll
+        };
+        
+        // Update quaternion based on the Euler angles
+        
+        quaternion = eulerToQuaternion(this->rotation.pitch, this->rotation.yaw, this->rotation.roll);
+        quaternion.normalize();
+        
+        // For backward compatibility, still update the cache matrices
+        updateCacheMatrix();
+        updateRotationMatrix();
+    }
+
+    std::string getPositionDebug() {
+        return std::to_string(static_cast<int>(this->position.x)) + ", " + std::to_string(static_cast<int>(this->position.y)) + ", " + std::to_string(static_cast<int>(this->position.z));
+    }
+
+    std::string getRotationDebug() {
+        return std::to_string(this->rotation.pitch) + ", " + std::to_string(this->rotation.yaw) + ", " + std::to_string(this->rotation.roll);
+    }
+};
+
+Camera::Camera(Point2D screenSize) {
+    this->position = {0.0f, 0.0f, 0.0f};
+    this->rotation = {0.0f, 0.0f, 0.0f};
+
+    // this->focalLength = 90;
+    this->fov = 90;
+    this->screenHeight_world = tanf(fov * 0.5) * 2;
+    this->perspectiveProjectionConstant = screenSize.y / this->screenHeight_world;
+
+
+    this->cacheMatrix = {
+        {sinf(rotation.pitch), 0.0f, cosf(rotation.pitch)},
+        {sinf(rotation.yaw), tanf(rotation.yaw), cosf(rotation.yaw)},
+        {sinf(rotation.roll), 0.0f, cosf(rotation.roll)}
+    };
+
+    this->rotationMatrix = {
+        {1.0f, -(abs(cacheMatrix.xAxis.pitch)), 1.0f},
+        {-cacheMatrix.yAxis.pitch, abs(cacheMatrix.yAxis.yaw), cacheMatrix.yAxis.roll},
+        {1.0f, 1.0f, 1.0f}
+    };
+}
+
+Camera::Camera(Point3D position, Rotation3D rotation, int focalLength, RotationMatrix3D cacheMatrix, RotationMatrix3D rotationMatrix) { 
+    this->position = position;
+    this->rotation = rotation;
+    this->focalLength = focalLength;
+    this->cacheMatrix = cacheMatrix;
+    this->rotationMatrix = rotationMatrix;
+}
+
+Camera::~Camera() {}
