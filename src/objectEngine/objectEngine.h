@@ -16,13 +16,22 @@ struct Vec2 {
     Vec2(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
 };
 
+struct iVec2 {
+    int x, y;
+
+    iVec2(int x = 0, int y = 0) : x(x), y(y) {}
+};
+
+
 struct Vec3 {
     float x, y, z;
 
     Vec3(float x = 0.0f, float y = 0.0f, float z = 0.0f) : x(x), y(y), z(z) {}
 
     Vec3 operator-(const Vec3& o) const { return {x - o.x, y - o.y, z - o.z}; }
+    Vec3 operator+(const Vec3& other) const { return {x + other.x, y + other.y, z + other.z}; }
 };
+
 
 
 // Note: This struct isn't intrinsically different from the Point3D-struct, and is more of a semantic distinction

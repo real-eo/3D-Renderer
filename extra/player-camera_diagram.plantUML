@@ -1,0 +1,54 @@
+@startuml player-camera
+
+' External type used by Camera/Player
+class Vec3 {
+  +x: float
+  +y: float
+  +z: float
+}
+
+class Camera {
+  -fov: float = M_PI/3.0
+  -aspect: float = 800.0/600.0
+  -pos: Vec3
+  -offset: Vec3
+  -entityPos: const Vec3* = nullptr
+  +yaw: float
+  +pitch: float
+
+  +Camera()
+  +Camera(position: const Vec3&, yawAngle: float, pitchAngle: float)
+  +Camera(entityPosition: const Vec3*, offset: const Vec3&)
+  +Camera(entityPosition: const Vec3*, offset: const Vec3&, yawAngle: float, pitchAngle: float)
+  +~Camera()
+
+  +isAttachedToEntity(): bool
+  +getPosition(): Vec3
+}
+
+class Player {
+  -speed: float = 0.05
+  -sensitivity: float = 0.002
+  -freeCam: bool = false
+  -camera: Camera
+  +pos: Vec3
+
+  +Player()
+  +~Player()
+}
+
+' Relationships
+Player *-- Camera : owns
+Camera --> "0..1" Vec3 : entityPos (pointer)
+Camera *-- Vec3 : pos, offset
+Player *-- Vec3 : pos
+
+note top of Player
+e:\VS Code\C++\3D Renderer\src\player\player.h/.cpp
+end note
+
+note top of Camera
+e:\VS Code\C++\3D Renderer\src\camera\camera.h/.cpp
+end note
+
+@enduml

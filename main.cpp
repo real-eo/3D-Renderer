@@ -22,6 +22,7 @@ Vec3 rotate(const Vec3& v, float yaw, float pitch) {
     float cosp = cosf(pitch), sinp = sinf(pitch);
 
     Vec3 out;
+    
     out.x = cosy * v.x + siny * v.z;
     out.z = -siny * v.x + cosy * v.z;
     out.y = cosp * v.y - sinp * out.z;
@@ -49,13 +50,13 @@ int main(int, char**) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     bool running = true;
-    SDL_SetRelativeMouseMode(SDL_TRUE); // capture mouse
+    SDL_SetRelativeMouseMode(SDL_TRUE);             // capture mouse
     Camera cam;
 
     // Cube vertices
     std::vector<Vec3> cube = {
-        {-1,-1,-1},{1,-1,-1},{1,1,-1},{-1,1,-1}, // back face
-        {-1,-1, 1},{1,-1, 1},{1,1, 1},{-1,1, 1}  // front face
+        {-1,-1,-1},{1,-1,-1},{1,1,-1},{-1,1,-1},    // back face
+        {-1,-1, 1},{1,-1, 1},{1,1, 1},{-1,1, 1}     // front face
     };
     // Cube edges
     std::vector<std::pair<int,int>> edges = {
