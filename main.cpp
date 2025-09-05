@@ -86,6 +86,10 @@ int main(int, char**) {
         const Uint8* keystate = SDL_GetKeyboardState(NULL);
         Vec3 forward = {sinf(cam.yaw), 0, cosf(cam.yaw)};
         Vec3 right   = {cosf(cam.yaw), 0, -sinf(cam.yaw)};
+
+        // ! IGNORE THESE ERRORS DURING REFACTORING! This is for handling input, and since the cam is now attached 
+        // ! to the player, it should instead interact with the player obj, but there is no point in changing code 
+        // ! that is going to be refactored anyway, so i'll just keep these errors here
         if (keystate[SDL_SCANCODE_W]) { cam.pos.x += forward.x * speed; cam.pos.z += forward.z * speed; }
         if (keystate[SDL_SCANCODE_S]) { cam.pos.x -= forward.x * speed; cam.pos.z -= forward.z * speed; }
         if (keystate[SDL_SCANCODE_A]) { cam.pos.x -= right.x   * speed; cam.pos.z -= right.z   * speed; }
@@ -103,8 +107,8 @@ int main(int, char**) {
             Vec3 v2 = cube[edge.second];
 
             // Transform to camera space
-            v1 = v1 - cam.pos;
-            v2 = v2 - cam.pos;
+            v1 = v1 - cam.getPosition();
+            v2 = v2 - cam.getPosition();
             v1 = rotate(v1, -cam.yaw, -cam.pitch);
             v2 = rotate(v2, -cam.yaw, -cam.pitch);
 

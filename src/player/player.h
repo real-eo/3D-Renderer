@@ -1,7 +1,7 @@
-#pragma once
-
 #ifndef PLAYERLIB_H
 #define PLAYERLIB_H
+
+#include <SDL2/SDL.h>
 
 // #include "src/objectEngine/objectEngine.h"           // Included in: "src/camera/camera.h"
 #include "src/camera/camera.h"
@@ -13,16 +13,19 @@ private:
     float sensitivity = 0.002f;
     
     bool freeCam = false;
-    Camera camera;
+    Camera* camera;
 
 public:
     Vec3 pos;
 
     Player();
-    Player(const Vec3& offset);
-    Player(const Vec3& position);
-    Player(const Vec3& position, const Vec3& offset);
+    Player(const Vec3& position = Vec3(0, 0, 0), const Vec3& offset = Vec3(0, 0, 0));
     ~Player();
+
+    inline const Camera* getCameraPointer() const { return camera; }
+
+    void move(const Uint8* key);
+    void turn(const int dx, const int dy);
 };
 
 

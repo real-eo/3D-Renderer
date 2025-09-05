@@ -1,4 +1,4 @@
-#include "src/render/render.h" 
+#include "src/render/render.h"
 
 #include <SDL2/SDL.h>
 
@@ -6,41 +6,6 @@
 
 
 Renderer::Renderer() {
-    // * Load font
-    font = TTF_OpenFont(FONT_PATH, 16);
-
-    if (font == nullptr) {
-        std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
-        return;
-    }
-
-    // * Text
-    //// std::cout << "Text contructor call " << std::endl;
-    fpsText = new Text({0,  0}, font, renderer);
-
-    cameraPositionDebugText = new Text({0, 30}, font, renderer);
-    cameraRotationDebugText = new Text({0, 50}, font, renderer);
-
-
-}
-
-Renderer::~Renderer() {
-    // * Free all text
-    delete fpsText;
-
-    delete cameraPositionDebugText;
-    delete cameraRotationDebugText;
-
-    // * Close the font
-    TTF_CloseFont(font);
-    
-    // * Destroy the window and renderer
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_Quit();
-}
-
-void Renderer::initialize() {
     // * Initialize Libaries
     // Initialize SDL
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -73,6 +38,49 @@ void Renderer::initialize() {
     }
 
     std::cout << "Window and renderer created successfully" << std::endl;
+
+    // Confine cursor to window
+    SDL_SetWindowGrab(window, SDL_TRUE);
+}
+
+Renderer::~Renderer() {
+    // * Free all text
+    delete fpsText;
+
+    delete cameraPositionDebugText;
+    delete cameraRotationDebugText;
+
+    // * Close the font
+    TTF_CloseFont(font);
+    
+    // * Destroy the window and renderer
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_Quit();
+}
+
+// Initialize the renderer with a camera to start drawing
+void Renderer::initialize(const Camera* camera) {
+    // * Store camera pointer for later use
+    this->camera = camera; 
+
+    // * Load font
+    font = TTF_OpenFont(FONT_PATH, 16);
+
+    if (font == nullptr) {
+        std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
+        return;
+    }
+
+    // * Text
+    //// std::cout << "Text contructor call " << std::endl;
+    fpsText = new Text({0,  0}, font, renderer);
+
+    cameraPositionDebugText = new Text({0, 30}, font, renderer);
+    cameraRotationDebugText = new Text({0, 50}, font, renderer);
+
+    // * Flag
+    initialized = true;
 }
 
 void Renderer::renderFrame() {
@@ -112,20 +120,91 @@ void Renderer::renderFrame() {
     SDL_RenderPresent(renderer);
     SDL_Delay(16); // ~60 FPS
     */
-}
 
-void Renderer::clear(const SDL_Color& color) {
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    /* // ? THIS IS THE OLD IMPLEMENTATION USED IN THE PREVIOUS VERSION OF THE RENDERER
+    void renderFrame() {
+        // * Clear the renderer
+        SDL_RenderClear(renderer);
+
+        // * Draw new frame
+        // FPS
+        if (showFPS) {
+            // -- Uint32 currentTime = SDL_GetTicks();
+            // -- Uint32 elapsedTime = currentTime - lastTime;
+
+            currentTime = SDL_GetTicks();
+            elapsedTime = currentTime - lastTime;
+
+            frameCount++;
+            
+            if (elapsedTime >= 1000) {
+                fps = static_cast<float>(frameCount) / (elapsedTime / 1000.0f);
+                
+                //// std::cout << "FPS: " << fps << std::endl;
+                //// logMessage("FPS: " + std::to_string(static_cast<int>(fps)), __LOGGING_INFO, __MAIN_LOGID);
+                fpsText->updateText("FPS: " + std::to_string(static_cast<int>(fps)));
+                // cameraDebugText->updateText("FPS: " + std::to_string(static_cast<int>(fps)));
+                       
+                lastTime = currentTime;
+                frameCount = 0;
+            }
+
+            fpsText->renderText();
+        }
+
+        if (elapsedTime % 100 == 0) {
+            cameraPositionDebugText->updateText("Position: " + camera.getPositionDebug());
+            cameraRotationDebugText->updateText("Rotation: " + camera.getRotationDebug());
+        }
+        
+        // Draw map
+        for (Shape3D &shape : map.shapes) {
+            drawShape(renderer, perspectiveProjection(camera, shape), WHITE, center, screenSize);
+        };
+
+        // Draw text
+        cameraPositionDebugText->renderText();
+        cameraRotationDebugText->renderText();
+
+    }
+    */
+
+    // * Clear the renderer
+    SDL_SetRenderDrawColor(renderer, windowColor.r, windowColor.g, windowColor.b, windowColor.a);
     SDL_RenderClear(renderer);
-}
 
-void Renderer::present() {
-    // ? Present the backbuffer
-    // ? It's currently missing implementation, but it should "swap the buffers"-showing the current frame to the user.
-    // ? Since I'm using double buffering, it should also prepare the backbuffer for the next frame.
-    // ? I think SDL_RenderPresent does this automatically, but I'm not entirely sure.
-    // TODO: Add vsync support
+    // * Draw new frame
+    // FPS
+    if (showFPS) {
+        currentTime = SDL_GetTicks();
+        elapsedTime = currentTime - lastTime;
 
-    // Present the backbuffer
-    // SDL_RenderPresent(renderer);
+        frameCount++;
+        
+        if (elapsedTime >= 1000) {
+            fps = static_cast<float>(frameCount) / (elapsedTime / 1000.0f);
+            
+            fpsText->update("FPS: " + std::to_string(static_cast<int>(fps)));
+                   
+            lastTime = currentTime;
+            frameCount = 0;
+        }
+
+        fpsText->render();
+    }
+
+    
+    if (elapsedTime % 100 == 0) {
+        cameraPositionDebugText->update("Position: " + camera->getPositionDebug());
+        cameraRotationDebugText->update("Rotation: " + camera->getRotationDebug());
+    }
+
+    // Draw map
+    // for (Shape3D &shape : map.shapes) {
+    //     drawShape(renderer, perspectiveProjection(camera, shape), WHITE, center, screenSize);
+    // };
+
+    // Draw text
+    cameraPositionDebugText->render();
+    cameraRotationDebugText->render();
 }
