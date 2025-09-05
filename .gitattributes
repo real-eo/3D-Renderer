@@ -1,0 +1,6 @@
+# Exclude only .mat material files in res/objects from language stats
+res/objects/**/*.mat linguist-generated=true
+res/objects/**/*.MAT linguist-generated=true
+
+# If there are a few .mat files you do want counted, override them after the glob:
+# res/objects/special/keep_this.mat linguist-generated=false
