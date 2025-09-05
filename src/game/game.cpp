@@ -1,53 +1,9 @@
 #include "src/game/game.h"
 
 Game::Game() {
-    // * Initialize Libaries
-    // Initialize SDL
-    SDL_Init(SDL_INIT_EVERYTHING);
-    
-    // Initialize SDL_ttf
-    if (TTF_Init() == -1) {
-        std::cerr << "Failed to initialize SDL_ttf: " << TTF_GetError() << std::endl;
-        return; 
-    }
-
-    // * Window
-    // Create a window
-    window = SDL_CreateWindow("3D Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
-
-    if (NULL == window) {
-        std::cout << "Could not create window: " << SDL_GetError() << std::endl;
-        
-        return;
-    }
-    
-    // Create a renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-    if (NULL == renderer) {
-        std::cout << "Could not create renderer: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        
-        return;
-    }
-
-    std::cout << "Window and renderer created successfully" << std::endl;
-
-    // Load font
-    font = TTF_OpenFont(FONT_PATH, 16);
-
-    if (font == nullptr) {
-        std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
-        return;
-    }
-
-    // * Text
-    //// std::cout << "Text contructor call " << std::endl;
-    fpsText = new Text({0,  0}, font, renderer);
-
-    cameraPositionDebugText = new Text({0, 30}, font, renderer);
-    cameraRotationDebugText = new Text({0, 50}, font, renderer);
+    // * Rendering
+    renderer = new Renderer();
+    renderer->initialize();
 
     // * Map
     // Set map
@@ -60,35 +16,49 @@ Game::Game() {
 
 
 Game::~Game() {
-    // * Free all text
-    delete fpsText;
-
-    delete cameraPositionDebugText;
-    delete cameraRotationDebugText;
-
-    // * Close the font
-    TTF_CloseFont(font);
-
-    // * Destroy the window and renderer
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_Quit();
+    // Call renderer destructor
+    delete renderer;
 
     std::cout << "Window and renderer destroyed successfully" << std::endl;
 }
 
-void Game::run() {
-    windowRunning = true;
+void Game::handleEvents() {
+    /* // ? THIS IS THE IMPLEMENTATION USED IN THE PRIMITVE VERSION OF THE INPUT LOGIC. THIS CODE IS KEPT FOR REFERENCE, AND DOESN'T CONTAIN ANY BUGS REGARDING THE HANDLING OF INPUT EVENTS
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+        if (e.type == SDL_QUIT) running = false;
+        if (e.type == SDL_MOUSEMOTION) {
+            cam.yaw   += e.motion.xrel * sensitivity;
+            cam.pitch += e.motion.yrel * sensitivity;
+            if (cam.pitch > M_PI/2) cam.pitch = M_PI/2;
+            if (cam.pitch < -M_PI/2) cam.pitch = -M_PI/2;
+        }
+    }
 
-    while (windowRunning) {
+    const Uint8* keystate = SDL_GetKeyboardState(NULL);
+    Vec3 forward = {sinf(cam.yaw), 0, cosf(cam.yaw)};
+    Vec3 right   = {cosf(cam.yaw), 0, -sinf(cam.yaw)};
+    if (keystate[SDL_SCANCODE_W]) { cam.pos.x += forward.x * speed; cam.pos.z += forward.z * speed; }
+    if (keystate[SDL_SCANCODE_S]) { cam.pos.x -= forward.x * speed; cam.pos.z -= forward.z * speed; }
+    if (keystate[SDL_SCANCODE_A]) { cam.pos.x -= right.x   * speed; cam.pos.z -= right.z   * speed; }
+    if (keystate[SDL_SCANCODE_D]) { cam.pos.x += right.x   * speed; cam.pos.z += right.z   * speed; }
+    */
+}
+
+void Game::run() {
+    gameRunning = true;
+
+    while (gameRunning) {
         // * Handle events
         handleEvents();
 
         // * Render frame
-        renderFrame();
+        renderer->renderFrame();
 
         // * Update the screen
-        SDL_SetRenderDrawColor(renderer, windowColor.r, windowColor.g, windowColor.b, windowColor.a);
-        SDL_RenderPresent(renderer);
+        renderer->clear();
+        renderer->present();
+        // SDL_SetRenderDrawColor(renderer, windowColor.r, windowColor.g, windowColor.b, windowColor.a);
+        // SDL_RenderPresent(renderer);
     }
 }

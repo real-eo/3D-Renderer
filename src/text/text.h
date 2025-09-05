@@ -4,6 +4,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <string>
 
+#include "src/macros.h"
+#include "src/objectEngine/objectEngine.h"
+
 #define FONT_PATH "res/fonts/ebrima.ttf"
 
 class Text {
@@ -24,6 +27,8 @@ private:
     inline void freeText();
     inline void createTextTexture();
 public:
+    Text(iVec2 position, TTF_Font* font, SDL_Renderer* renderer, SDL_Color textColor = WHITE);
+    Text(const std::string text, const iVec2 position, const SDL_Color textColor, TTF_Font* font, SDL_Renderer* renderer);
     Text(const std::string& fontPath, int fontSize);
     ~Text();
 
