@@ -1,6 +1,8 @@
-# Exclude only .ma material files in res/objects from language stats
-res/objects/**/*.ma linguist-generated=true
-res/objects/**/*.MA linguist-generated=true
+# Exclude only material/asset files from language stats
+res/objects/**/*.mat linguist-generated=true
+res/objects/**/*.MAT linguist-generated=true
+res/objects/**/*.ma  linguist-generated=true
+res/objects/**/*.MA  linguist-generated=true
 
-# If there are a few .mat files you do want counted, override them after the glob:
-# res/objects/special/keep_this.mat linguist-generated=false
+# If you need to keep a specific file counted, override after the glob:
+# res/objects/low-poly tree/Lowpoly_tree_sample.ma linguist-generated=false
