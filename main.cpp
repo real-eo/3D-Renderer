@@ -71,7 +71,7 @@ int main(int, char**) {
     float sensitivity = 0.002f;
 
     while (running) {
-        // =================== Input ===================
+        // 8=================D Input 8=================D
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) running = false;

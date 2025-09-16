@@ -155,15 +155,61 @@ void Game::handleEvents() {
     SDL_Event e;
     
     while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) {
-            gameRunning = false;
-        } else if (e.type == SDL_MOUSEMOTION) {
-            // Relative mouse deltas -> player/camera
-            player->turn(e.motion.xrel, e.motion.yrel);
-        }
-    }
+        // if (e.type == SDL_QUIT) {
+        //     gameRunning = false;
+        // } else if (e.type == SDL_MOUSEMOTION) {
+        //     // Relative mouse deltas -> player/camera
+        //     player->turn(e.motion.xrel, e.motion.yrel);
+        // }
 
-    player->move(keyboardState);
+        switch (e.type) {
+            case SDL_QUIT:
+                gameRunning = false;
+                break;
+
+            case SDL_KEYDOWN:
+                switch (e.key.keysym.sym) {
+                    case SDLK_F11:
+                        // Toggle fullscreen
+                        renderer->toggleFullscreen();
+                        
+                        // ? Commented out because rendering is now done differently
+                        // // Update projection constant
+                        // // camera.perspectiveProjectionConstant = screenSize.y / camera.screenHeight_world;
+                        break;
+
+                    case SDLK_m:
+                        // | NOTE: TEMPORARY CODE ONLY MEANT FOR DEBUG!
+                        //         Future implementation will have a function 
+                        //         within the game class to handle map switching
+
+                        std::cout << "Map ID: " << mapID << "\n";
+
+                        switch (mapID % 2) {
+                            case 0: setMap("testMapVoid"); break;
+                            case 1: setMap("testMapGround"); mapID = -1; break;
+                        }
+                        
+                        map = getMap();
+                        mapID++;
+                       
+                        break;
+
+                    default:
+                        // TODO: Handle other key presses if needed
+                        break;
+                }
+
+                break;
+
+            case SDL_MOUSEMOTION:
+                player->turn(e.motion.xrel, e.motion.yrel);
+                break;
+        }
+    
+        // After all events are handled, move the player based on current keyboard state:
+        player->move(keyboardState);
+    }
 }
 
 void Game::run() {

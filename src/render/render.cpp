@@ -208,3 +208,34 @@ void Renderer::renderFrame() {
     cameraPositionDebugText->render();
     cameraRotationDebugText->render();
 }
+
+void Renderer::toggleFullscreen() {
+    // Disable
+    if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) {
+        SDL_SetWindowFullscreen(window, 0);
+        SDL_ShowCursor(SDL_ENABLE);
+        
+        // ? Commented out because these variables are unused in the Renderer class PER NOW!
+        // // center = {WIDTH >> 1, HEIGHT >> 1};
+        // // screenSize = {WIDTH, HEIGHT};
+
+        fullscreenMode = false;
+    } 
+    
+    // Enable
+    else {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_GetCurrentDisplayMode(0, &currentDisplayMode);
+        SDL_ShowCursor(SDL_DISABLE);
+        
+        // ? Commented out because these variables are unused in the Renderer class PER NOW!
+        // // center = {currentDisplayMode.w >> 1, currentDisplayMode.h >> 1};
+        // // screenSize = {currentDisplayMode.w, currentDisplayMode.h};
+        
+        // ? Commented out because mouse handling is now done differently
+        // // SDL_WarpMouseInWindow(window, center.x, center.y);
+
+        fullscreenMode = true;
+    }
+};
+

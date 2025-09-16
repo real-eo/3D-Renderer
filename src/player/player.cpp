@@ -1,4 +1,5 @@
 #include "src/player/player.h"
+#include "src/macros.h"
 
 
 Player::Player()                                            : pos({0, 0, 0})    { camera = new Camera(&pos, Vec3(0, 0, 0)); }
@@ -25,6 +26,6 @@ void Player::turn(const int dx, const int dy) {
     camera->pitch += dy * sensitivity;
 
     // Clamp pitch to [-pi/2, pi/2]
-    if (camera->pitch > M_PI / 2)  camera->pitch = M_PI / 2;
-    if (camera->pitch < -M_PI / 2) camera->pitch = -M_PI / 2;
+    if (camera->pitch > M_HALF_PI_f)  camera->pitch = M_HALF_PI_f;
+    if (camera->pitch < -M_HALF_PI_f) camera->pitch = -M_HALF_PI_f;
 }

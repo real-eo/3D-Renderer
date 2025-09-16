@@ -14,5 +14,8 @@
 #define CYAN SDL_Color{0, 255, 255, 255}
 #define MAGENTA SDL_Color{255, 0, 255, 255}
 
+// Math
+#define M_HALF_PI_f 1.57079632679f
+
 
 #endif // MACROS_H

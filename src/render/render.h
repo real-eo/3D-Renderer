@@ -61,6 +61,8 @@ public:
     void renderFrame();
     // void renderFrame(const std::vector<Triangle>& triangles);                        // ? For future use
     
+    void toggleFullscreen();
+
     inline void present() {
         // ? Present the backbuffer
         // ? It's currently missing implementation, but it should "swap the buffers"-showing the current frame to the user.
