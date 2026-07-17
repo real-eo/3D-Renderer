@@ -36,6 +36,12 @@ void insertPair(HashTable* table, const char* key, const char* value) {
 
     Node* node = new Node;
 
+    /* TODO: Memory leak / inconsisten allocators
+    `node` is allocated with C++ `new`, but `key`/`value` are allocated with `strdup` (which uses `malloc` under the hood). 
+    There is no `destroyHashTable` or `freeNode` function anywhere in the file - nothing ever calls `delete` on the nodes/table or `free` 
+    on the strdup'd strings. So every hashtable is a guaranteed leak for its whole lifetime, and even if someone added cleanup later, they'd 
+    have to remember to `free()` the strings but `delete` the nodes - mixing allocators like this is a common source of real bugs and should be fixed
+    */
     node->key = strdup(key);
     node->value = strdup(value);
     node->next = table->buckets[idx];
