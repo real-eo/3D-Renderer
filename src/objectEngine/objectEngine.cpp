@@ -98,7 +98,7 @@ Shape3d __loadObjectOBJ(const char path[]) {
                 __issInt >> index;
                 __face.push_back(index - 1);  // .obj indices start at 1
             }
-
+            // TODO: Ensure that `__face.size()` is actually valid (non-zero, positive), so that it doesn't warp around to 18 quintillion /!\
             for (size_t iteration = 0; iteration < __face.size() - 1; ++iteration) {
                 logMessage("Edge: " + std::to_string(__face[iteration]) + ", " + std::to_string(__face[iteration + 1]), __LOGGING_TRACE, __OE_LOGID);
                 __shape.edges.push_back({__face[iteration], __face[iteration + 1]});
