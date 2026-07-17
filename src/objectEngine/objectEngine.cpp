@@ -79,6 +79,7 @@ Shape3d __loadObjectOBJ(const char path[]) {
                 __vertex.push_back(std::stof(__token) * __objectScalar);
             }
 
+            // TODO: Ensure that the vertex in the .obj actually has three lines, and that all columns are integers  
             __shape.verticeGeometry.push_back({__vertex[0], __vertex[1], __vertex[2]});
 
             logMessage("Vertex:", __LOGGING_TRACE, __OE_LOGID);
